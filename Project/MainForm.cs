@@ -136,7 +136,7 @@ namespace HidDemo
             foreach (TreeNode node in treeViewDevices.Nodes)
             {
                 Hid.Device device = (Hid.Device)node.Tag;
-                if (!device.IsHid)
+                if (!(device.DeviceType == Hid.DeviceType.Hid))
                 {
                     //Now allowing mouse and keyboard to register too
                     //Do not allow registering mice and keyboards for now
@@ -347,7 +347,7 @@ namespace HidDemo
             foreach (TreeNode node in treeViewDevices.Nodes)
             {
                 Hid.Device device = (Hid.Device)node.Tag;
-                if (device.IsKeyboard || (device.IsHid && 
+                if (device.DeviceType == Hid.DeviceType.Keyboard || (device.DeviceType == Hid.DeviceType.Hid && 
                     (device.UsageId == mceUsageId || device.UsageId == consumerUsageId || device.UsageId == gamepadUsageId)))
                 {
                     node.Checked = true;

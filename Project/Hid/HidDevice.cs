@@ -29,6 +29,15 @@ using SharpLib.Win32;
 
 namespace SharpLib.Hid
 {
+    public enum DeviceType
+    {
+        Unknown = 0,
+        Hid = 0x01,
+        Mouse = 0x02 | Hid,
+        Keyboard = 0x04 | Hid,
+        Gamepad = 0x08 | Hid,
+    }
+
     /// <summary>
     /// Represent a HID device.
     /// Rename to RawInputDevice?
@@ -348,47 +357,20 @@ namespace SharpLib.Hid
             return null;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsGamePad
+        public DeviceType DeviceType
         {
             get
             {
-                return ((UsagePage)iCapabilities.UsagePage == Hid.UsagePage.GenericDesktopControls && (UsageCollection.GenericDesktop)iCapabilities.Usage == Hid.UsageCollection.GenericDesktop.GamePad);
-            }
-        }
+                if (Info.dwType == RawInputDeviceType.RIM_TYPEMOUSE)
+                    return DeviceType.Mouse;
+                if (Info.dwType == RawInputDeviceType.RIM_TYPEKEYBOARD)
+                    return DeviceType.Keyboard;
+                if ((UsagePage) iCapabilities.UsagePage == Hid.UsagePage.GenericDesktopControls && (UsageCollection.GenericDesktop) iCapabilities.Usage == Hid.UsageCollection.GenericDesktop.GamePad)
+                    return DeviceType.Gamepad;
+                if (Info.dwType == RawInputDeviceType.RIM_TYPEHID)
+                    return DeviceType.Hid;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsMouse
-        {
-            get
-            {
-                return Info.dwType == RawInputDeviceType.RIM_TYPEMOUSE;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsKeyboard
-        {
-            get
-            {
-                return Info.dwType == RawInputDeviceType.RIM_TYPEKEYBOARD;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsHid
-        {
-            get
-            {
-                return Info.dwType == RawInputDeviceType.RIM_TYPEHID;
+                return DeviceType.Unknown;
             }
         }
 
