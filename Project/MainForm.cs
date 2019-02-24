@@ -41,7 +41,7 @@ namespace HidDemo
     /// MainForm for our HID demo.
     /// </summary>
     public partial class MainForm : System.Windows.Forms.Form
-	{
+    {
         /// <summary>
         /// Can be used to register for WM_INPUT messages and parse them.
         /// For testing purposes it can also be used to solely register for WM_INPUT messages.
@@ -57,11 +57,11 @@ namespace HidDemo
 
         public delegate void OnHidEventDelegate(object aSender, Hid.Event aHidEvent);
 
-		public MainForm()
-		{
-			// Required for Windows Form Designer support
-			InitializeComponent();           
-		}
+        public MainForm()
+        {
+            // Required for Windows Form Designer support
+            InitializeComponent();
+        }
 
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace HidDemo
         private void MainForm_Load(object sender, System.EventArgs e)
         {
             this.Text += " - " + Version();
-            
+
             PopulateDeviceList();
             RegisterHidDevices();
             CheckDefaultDevices();
@@ -223,7 +223,7 @@ namespace HidDemo
             Guid guid;
             Extra.Function.HidD_GetHidGuid(out guid);
             // Try HID
-            Boolean ok=OpenPropertiesDialog(aDevicePath, guid);
+            Boolean ok = OpenPropertiesDialog(aDevicePath, guid);
             if (ok) return ok;
             // Try mouse
             ok = OpenPropertiesDialog(aDevicePath, Extra.Const.GUID_DEVINTERFACE_MOUSE);
@@ -359,7 +359,7 @@ namespace HidDemo
         /// Go through our device list and register the devices that are checked.
         /// </summary>
         void RegisterHidDevices()
-	    {
+        {
             // Register the input device to receive the commands from the
             // remote device. See http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnwmt/html/remote_control.asp
             // for the vendor defined usage page.
@@ -372,12 +372,12 @@ namespace HidDemo
             // See: Const.RIDEV_EXINPUTSINK and Const.RIDEV_INPUTSINK
 
             //We collect our devices in a dictionary to remove duplicates
-            Dictionary<uint, Hid.Device>  devices = new Dictionary<uint, Hid.Device>();
+            Dictionary<uint, Hid.Device> devices = new Dictionary<uint, Hid.Device>();
             foreach (TreeNode node in treeViewDevices.Nodes)
             {
                 Hid.Device device = (Hid.Device)node.Tag;
                 //Now allowing mouse and keyboard to register too
-                if (node.Checked /*&& device.IsHid*/) 
+                if (node.Checked /*&& device.IsHid*/)
                 {
                     try
                     {
@@ -391,7 +391,7 @@ namespace HidDemo
                 }
             }
 
-            if (devices.Count==0)
+            if (devices.Count == 0)
             {
                 //No device to register for, nothing to do here
                 return;
@@ -400,8 +400,8 @@ namespace HidDemo
             int i = 0;
             RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[devices.Count];
 
-            foreach (KeyValuePair<uint,Hid.Device> entry in devices)
-            {                
+            foreach (KeyValuePair<uint, Hid.Device> entry in devices)
+            {
                 rid[i].usUsagePage = entry.Value.UsagePage;
                 rid[i].usUsage = entry.Value.UsageCollection;
                 rid[i].dwFlags = (RawInputDeviceFlags)flags;
@@ -474,8 +474,8 @@ namespace HidDemo
                 //For testing purposes we parse WM_INPUT messages from another Handler instance.
                 iHidParser = new SharpLib.Hid.Handler(checkBoxRepeat.Checked, (int)numericRepeatDelay.Value, (int)numericRepeatSpeed.Value);
             }
-            
-            iHidParser.OnHidEvent += HandleHidEventThreadSafe;            
+
+            iHidParser.OnHidEvent += HandleHidEventThreadSafe;
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace HidDemo
                 {
                     toolStripStatusLabelDevice.Text = aHidEvent.Device.FriendlyName;
                 }
-                
+
                 richTextBoxLogs.AppendText(aHidEvent.ToLog());
             }
         }
@@ -516,12 +516,12 @@ namespace HidDemo
         /// </summary>
         /// <param name="message"></param>
 		protected override void WndProc(ref Message message)
-		{
+        {
             switch (message.Msg)
             {
                 //case Const.WM_KEYDOWN:
-                    //ProcessKeyDown(message.WParam);
-                    //break;
+                //ProcessKeyDown(message.WParam);
+                //break;
                 case Const.WM_INPUT:
                     //Log that message
                     richTextBoxLogs.AppendText("WM_INPUT: " + message.ToString() + "\r\n");
@@ -532,8 +532,8 @@ namespace HidDemo
                     break;
             }
             //Is that needed? Check the docs.
-			base.WndProc(ref message);
-		}
+            base.WndProc(ref message);
+        }
 
         /// <summary>
         /// 
@@ -547,13 +547,13 @@ namespace HidDemo
 
 
         private void buttonClear_Click(object sender, EventArgs e)
-		{
-			listViewEvents.Items.Clear();
-		}
+        {
+            listViewEvents.Items.Clear();
+        }
 
         private void buttonTreeViewCollapseAll_Click(object sender, EventArgs e)
         {
-            treeViewDevices.CollapseAll();            
+            treeViewDevices.CollapseAll();
         }
 
         private void buttonTreeViewExpandAll_Click(object sender, EventArgs e)
@@ -563,7 +563,7 @@ namespace HidDemo
 
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
-            PopulateDeviceList();            
+            PopulateDeviceList();
         }
 
         private void checkBoxRepeat_CheckedChanged(object sender, EventArgs e)
@@ -656,7 +656,7 @@ namespace HidDemo
                 e.SuppressKeyPress = true;
             }
             */
-         
+
         }
 
         private void treeViewDevices_MouseUp(object sender, MouseEventArgs e)
@@ -678,7 +678,7 @@ namespace HidDemo
                     //m_OldSelectNode = treeView1.SelectedNode;
                     treeViewDevices.SelectedNode = node;
 
-                    contextMenuStripDevice.Show(treeViewDevices,p);
+                    contextMenuStripDevice.Show(treeViewDevices, p);
 
                     // Find the appropriate ContextMenu depending on the selected node.
                     /*
