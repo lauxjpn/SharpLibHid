@@ -125,7 +125,7 @@ namespace HidDemo
         {
             treeViewDevices.Nodes.Clear();
             //Create our list of HID devices
-            SharpLib.Win32.RawInput.PopulateDeviceList(treeViewDevices);
+            PopulateDeviceList(treeViewDevices);
             treeViewDevices.CollapseAll();
             //Hide check boxes
             //treeViewDevices.Nodes.OfType<TreeNode>().ToList().ForEach(n => TreeViewUtils.HideCheckBox(treeViewDevices,n));
@@ -148,6 +148,68 @@ namespace HidDemo
             richTextBoxLogs.AppendText(TreeViewUtils.TreeViewToText(treeViewDevices));
         }
 
+        /// <summary>
+        /// Populate the given tree-view control with our Raw Input Devices.
+        /// </summary>
+        /// <param name="aTreeView"></param>
+        public static void PopulateDeviceList(TreeView aTreeView)
+        {
+            var devices = Hid.Device.GetDevices();
+
+            //For each our device add a node to our treeview
+            foreach (var device in devices)
+            {
+                TreeNode node = null;
+                if (device.Product != null && device.Product.Length > 1)
+                {
+                    //Add the devices with a proper name at the top
+                    node = aTreeView.Nodes.Insert(0, device.Name, device.FriendlyName);
+                }
+                else
+                {
+                    //Add other once at the bottom
+                    node = aTreeView.Nodes.Add(device.Name, device.FriendlyName);
+                }
+
+                //Each device root node keeps a reference to our HID device
+                node.Tag = device;
+
+                //Populate device properties
+                node.Nodes.Add("Manufacturer: " + device.Manufacturer);
+                node.Nodes.Add("Product ID: 0x" + device.ProductId.ToString("X4"));
+                node.Nodes.Add("Vendor ID: 0x" + device.VendorId.ToString("X4"));
+                node.Nodes.Add("Version: " + device.Version);
+                node.Nodes.Add(device.Info.dwType.ToString());
+                if (device.Info.dwType == RawInputDeviceType.RIM_TYPEHID)
+                {
+                    node.Nodes.Add("UsagePage / UsageCollection: 0x" + device.Info.hid.usUsagePage.ToString("X4") + " / 0x" + device.Info.hid.usUsage.ToString("X4"));
+                }
+
+                if (device.InputCapabilitiesDescription != null)
+                {
+                    node.Nodes.Add(device.InputCapabilitiesDescription);
+                }
+
+                //Add button count
+                node.Nodes.Add("Button Count: " + device.ButtonCount);
+
+                //Those can be joystick/gamepad axis
+                if (device.InputValueCapabilities != null)
+                {
+                    foreach (HIDP_VALUE_CAPS caps in device.InputValueCapabilities)
+                    {
+                        string des = SharpLib.Hid.Device.InputValueCapabilityDescription(caps);
+                        if (des != null)
+                        {
+                            node.Nodes.Add(des);
+                        }
+                    }
+
+                }
+
+                node.Nodes.Add(device.Name);
+            }
+        }
 
         /// <summary>
         /// Open system properties dialog for specified device

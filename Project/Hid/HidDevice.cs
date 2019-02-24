@@ -19,6 +19,7 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -517,6 +518,42 @@ namespace SharpLib.Hid
             Debug.Write(ToString());
         }
 
+        public static IEnumerable<Device> GetDevices()
+        {
+            uint deviceCount = 0;
+
+            var result = Win32.Function.GetRawInputDeviceList(null, ref deviceCount, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICELIST)));
+            if (result == -1)
+                throw new Exception("Error executing GetRawInputDeviceList.");
+
+            RAWINPUTDEVICELIST[] rawInputDevices;
+
+            do
+            {
+                rawInputDevices = new RAWINPUTDEVICELIST[deviceCount];
+                
+                result = Win32.Function.GetRawInputDeviceList(rawInputDevices, ref deviceCount, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICELIST)));
+                if (result == -1)
+                    throw new Exception("Error executing GetRawInputDeviceList.");
+
+            } while (result != deviceCount);
+
+            foreach (var rawInputDevice in rawInputDevices)
+            {
+                Device device;
+
+                try
+                {
+                    device = new Device(rawInputDevice.hDevice);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                yield return device;
+            }
+        }
     }
 
 }
