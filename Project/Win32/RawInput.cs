@@ -70,9 +70,8 @@ namespace SharpLib.Win32
         }
 
 
-        static public partial class Function
+        public static partial class Function
         {
-
             [DllImport(@"hid.dll", CharSet = CharSet.Auto, SetLastError = true)]
             public static extern void HidD_GetHidGuid(out Guid gHid);
 
@@ -195,13 +194,11 @@ namespace SharpLib.Win32
             public static extern Boolean SetupDiDestroyDeviceInfoList(IntPtr hDevInfo);
         }
     }
-
-
-
+    
     /// <summary>
     /// Provide some utility functions for raw input handling.
     /// </summary>
-    static public class RawInput
+    public static class RawInput
     {
         /// <summary>
         /// 
@@ -292,22 +289,23 @@ namespace SharpLib.Win32
         /// <returns></returns>
         public static IntPtr GetPreParsedData(IntPtr hDevice)
         {
-            uint ppDataSize = 0;
-            int result = Win32.Function.GetRawInputDeviceInfo(hDevice, RawInputDeviceInfoType.RIDI_PREPARSEDDATA, IntPtr.Zero, ref ppDataSize);
+            uint dataSize = 0;
+            int result = Win32.Function.GetRawInputDeviceInfo(hDevice, RawInputDeviceInfoType.RIDI_PREPARSEDDATA, IntPtr.Zero, ref dataSize);
             if (result != 0)
             {
                 Debug.WriteLine("Failed to get raw input pre-parsed data size: " + result + " : " + Marshal.GetLastWin32Error());
                 return IntPtr.Zero;
             }
 
-            IntPtr ppData = Marshal.AllocHGlobal((int)ppDataSize);
-            result = Win32.Function.GetRawInputDeviceInfo(hDevice, RawInputDeviceInfoType.RIDI_PREPARSEDDATA, ppData, ref ppDataSize);
+            IntPtr pData = Marshal.AllocHGlobal((int)dataSize);
+            result = Win32.Function.GetRawInputDeviceInfo(hDevice, RawInputDeviceInfoType.RIDI_PREPARSEDDATA, pData, ref dataSize);
             if (result <= 0)
             {
                 Debug.WriteLine("Failed to get raw input pre-parsed data: " + result + " : " + Marshal.GetLastWin32Error());
                 return IntPtr.Zero;
             }
-            return ppData;
+
+            return pData;
         }
 
         /// <summary>

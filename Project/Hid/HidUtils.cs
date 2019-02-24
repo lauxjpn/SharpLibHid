@@ -23,7 +23,7 @@ using System.Text;
 
 namespace SharpLib.Hid
 {
-    static class Utils
+    public static class Utils
     {
         /// <summary>
         /// Provide the type for the usage collection corresponding to the given usage page.

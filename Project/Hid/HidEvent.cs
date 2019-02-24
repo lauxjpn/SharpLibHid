@@ -65,8 +65,9 @@ namespace SharpLib.Hid
         /// </summary>
         public bool IsGeneric { get; private set; }
 
-        public Keys VirtualKey {
-            get { return (Keys) RawInput.keyboard.VKey; }
+        public Keys VirtualKey
+        {
+            get { return (Keys)RawInput.keyboard.VKey; }
         }
 
         public bool HasModifierShift;
@@ -187,7 +188,7 @@ namespace SharpLib.Hid
         }
 
         public Device Device { get; private set; }
-        public RAWINPUT RawInput { get {return iRawInput;} } 
+        public RAWINPUT RawInput { get { return iRawInput; } }
         private RAWINPUT iRawInput;
 
         /// <summary>
@@ -198,13 +199,13 @@ namespace SharpLib.Hid
         /// <summary>
         /// Usage Page as enumeration.
         /// </summary>
-        public UsagePage UsagePageEnum {get { return (UsagePage) UsagePage; } }
+        public UsagePage UsagePageEnum { get { return (UsagePage)UsagePage; } }
 
         /// <summary>
         /// Provides the name of our usage page.
         /// </summary>
         public string UsagePageName()
-        {            
+        {
             return UsagePageEnum.ToString();
         }
 
@@ -226,8 +227,8 @@ namespace SharpLib.Hid
         /// </summary>
         public string UsageCollectionName()
         {
-                Type collectionType = Utils.UsageCollectionType(UsagePageEnum);
-                return Enum.GetName(collectionType, UsageCollection);                
+            Type collectionType = Utils.UsageCollectionType(UsagePageEnum);
+            return Enum.GetName(collectionType, UsageCollection);
         }
 
         /// <summary>
@@ -235,7 +236,7 @@ namespace SharpLib.Hid
         /// </summary>
         public string UsageCollectionNameAndValue()
         {
-                return string.Format("{0} (0x{1})", UsageCollectionName(), UsageCollection.ToString("X4"));
+            return string.Format("{0} (0x{1})", UsageCollectionName(), UsageCollection.ToString("X4"));
         }
 
         public List<ushort> Usages { get; private set; }
@@ -262,11 +263,11 @@ namespace SharpLib.Hid
         }
 
         public uint UsageId { get { return ((uint)UsagePage << 16 | (uint)UsageCollection); } }
-        
+
         /// <summary>
         /// Sorted in the same order as Device.InputValueCapabilities.
         /// </summary>
-        public Dictionary<HIDP_VALUE_CAPS,uint> UsageValues { get; private set; }
+        public Dictionary<HIDP_VALUE_CAPS, uint> UsageValues { get; private set; }
         //TODO: We need a collection of input report
         public byte[] InputReport { get; private set; }
         //
@@ -672,7 +673,7 @@ namespace SharpLib.Hid
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">An System.Timers.ElapsedEventArgs object that contains the event data.</param>
         /// <param name="aHidEvent">The HID Event from which our repeat is coming from.</param>
-        static private void OnRepeatTimerElapsed(object sender, ElapsedEventArgs e, Event aHidEvent)
+        private static void OnRepeatTimerElapsed(object sender, ElapsedEventArgs e, Event aHidEvent)
         {
             if (aHidEvent.IsStray)
             {
@@ -740,7 +741,7 @@ namespace SharpLib.Hid
         /// 
         /// </summary>
         /// <returns></returns>
-        override public string ToString()
+        public override string ToString()
         {
             string res = "";            
             if (!IsValid)

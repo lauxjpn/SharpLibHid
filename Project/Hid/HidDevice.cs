@@ -212,7 +212,7 @@ namespace SharpLib.Hid
         /// <summary>
         /// Useful for gamepads.
         /// </summary>
-        void ComputeButtonCount()
+        private void ComputeButtonCount()
         {
             ButtonCount = 0;
             foreach (HIDP_BUTTON_CAPS bc in iInputButtonCapabilities)
@@ -228,7 +228,7 @@ namespace SharpLib.Hid
         /// <summary>
         /// 
         /// </summary>
-        void SetInputCapabilitiesDescription()
+        private void SetInputCapabilitiesDescription()
         {
             InputCapabilitiesDescription = "[ Input Capabilities ] Button: " + Capabilities.NumberInputButtonCaps + " - Value: " + Capabilities.NumberInputValueCaps + " - Data indices: " + Capabilities.NumberInputDataIndices;
         }
@@ -321,7 +321,7 @@ namespace SharpLib.Hid
         /// </summary>
         /// <param name="aCaps"></param>
         /// <returns></returns>
-        static public string InputValueCapabilityDescription(HIDP_VALUE_CAPS aCaps)
+        public static string InputValueCapabilityDescription(HIDP_VALUE_CAPS aCaps)
         {
             if (!aCaps.IsRange && Enum.IsDefined(typeof(UsagePage), aCaps.UsagePage))
             {
