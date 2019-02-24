@@ -42,7 +42,7 @@ namespace SharpLib.Hid
     /// Represent a HID device.
     /// Rename to RawInputDevice?
     /// </summary>
-    public class Device: IDisposable
+    public class Device : IDisposable
     {
         /// <summary>
         /// Unique name of that HID device.
@@ -62,9 +62,9 @@ namespace SharpLib.Hid
         public ushort ProductId { get; private set; }
         public ushort Version { get; private set; }
         //Pre-parsed HID descriptor
-        public IntPtr PreParsedData {get; private set;}
+        public IntPtr PreParsedData { get; private set; }
         //Info
-        public RID_DEVICE_INFO Info { get {return iInfo;} }
+        public RID_DEVICE_INFO Info { get { return iInfo; } }
         private RID_DEVICE_INFO iInfo;
         //Capabilities
         public HIDP_CAPS Capabilities { get { return iCapabilities; } }
@@ -129,47 +129,46 @@ namespace SharpLib.Hid
             }
 
             //Open our device from the device name/path
-            SafeFileHandle handle = Win32.Function.CreateFile(Name,
+            using (var handle = Win32.Function.CreateFile(Name,
                 Win32.FileAccess.NONE,
                 Win32.FileShare.FILE_SHARE_READ | Win32.FileShare.FILE_SHARE_WRITE,
                 IntPtr.Zero,
                 Win32.CreationDisposition.OPEN_EXISTING,
                 Win32.FileFlagsAttributes.FILE_FLAG_OVERLAPPED,
                 IntPtr.Zero
-                );
-
-            //Check if CreateFile worked
-            if (handle.IsInvalid)
+            ))
             {
-                throw new Exception("HidDevice: CreateFile failed: " + Marshal.GetLastWin32Error().ToString());
+                //Check if CreateFile worked
+                if (handle.IsInvalid)
+                {
+                    throw new Exception("HidDevice: CreateFile failed: " + Marshal.GetLastWin32Error());
+                }
+
+                //Get manufacturer string
+                var manufacturerString = new StringBuilder(256);
+                if (Win32.Function.HidD_GetManufacturerString(handle, manufacturerString, manufacturerString.Capacity))
+                {
+                    Manufacturer = manufacturerString.ToString();
+                }
+
+                //Get product string
+                var productString = new StringBuilder(256);
+                if (Win32.Function.HidD_GetProductString(handle, productString, productString.Capacity))
+                {
+                    Product = productString.ToString();
+                }
+
+                //Get attributes
+                Win32.HIDD_ATTRIBUTES attributes = new Win32.HIDD_ATTRIBUTES();
+                if (Win32.Function.HidD_GetAttributes(handle, ref attributes))
+                {
+                    VendorId = attributes.VendorID;
+                    ProductId = attributes.ProductID;
+                    Version = attributes.VersionNumber;
+                }
             }
 
-            //Get manufacturer string
-            StringBuilder manufacturerString = new StringBuilder(256);
-            if (Win32.Function.HidD_GetManufacturerString(handle, manufacturerString, manufacturerString.Capacity))
-            {
-                Manufacturer = manufacturerString.ToString();
-            }
-
-            //Get product string
-            StringBuilder productString = new StringBuilder(256);
-            if (Win32.Function.HidD_GetProductString(handle, productString, productString.Capacity))
-            {
-                Product = productString.ToString();
-            }
-
-            //Get attributes
-            Win32.HIDD_ATTRIBUTES attributes = new Win32.HIDD_ATTRIBUTES();
-            if (Win32.Function.HidD_GetAttributes(handle, ref attributes))
-            {
-                VendorId = attributes.VendorID;
-                ProductId = attributes.ProductID;
-                Version = attributes.VersionNumber;
-            }
-
-            handle.Close();
-
-            SetFriendlyName();            
+            SetFriendlyName();
 
             //Get our HID descriptor pre-parsed data
             PreParsedData = Win32.RawInput.GetPreParsedData(hRawInputDevice);
@@ -230,7 +229,7 @@ namespace SharpLib.Hid
                 {
                     ButtonCount += (bc.Range.UsageMax - bc.Range.UsageMin + 1);
                 }
-            }            
+            }
         }
 
 
@@ -295,9 +294,9 @@ namespace SharpLib.Hid
                 FriendlyName = Product + suffix;
             }
             else
-            {   
+            {
                 //Extract friendly name from name
-                char[] delimiterChars = { '#', '&'};
+                char[] delimiterChars = { '#', '&' };
                 string[] words = Name.Split(delimiterChars);
                 if (words.Length >= 2)
                 {
@@ -320,8 +319,11 @@ namespace SharpLib.Hid
         /// </summary>
         public void Dispose()
         {
-            Marshal.FreeHGlobal(PreParsedData);
-            PreParsedData = IntPtr.Zero;
+            if (PreParsedData != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(PreParsedData);
+                PreParsedData = IntPtr.Zero;
+            }
         }
 
         /// <summary>
@@ -335,7 +337,7 @@ namespace SharpLib.Hid
             if (!aCaps.IsRange && Enum.IsDefined(typeof(UsagePage), aCaps.UsagePage))
             {
                 Type usageType = Utils.UsageType((UsagePage)aCaps.UsagePage);
-                if (usageType==null)
+                if (usageType == null)
                 {
                     return "Input Value: " + Enum.GetName(typeof(UsagePage), aCaps.UsagePage) + " Usage 0x" + aCaps.NotRange.Usage.ToString("X2");
                 }
@@ -365,7 +367,7 @@ namespace SharpLib.Hid
                     return DeviceType.Mouse;
                 if (Info.dwType == RawInputDeviceType.RIM_TYPEKEYBOARD)
                     return DeviceType.Keyboard;
-                if ((UsagePage) iCapabilities.UsagePage == Hid.UsagePage.GenericDesktopControls && (UsageCollection.GenericDesktop) iCapabilities.Usage == Hid.UsageCollection.GenericDesktop.GamePad)
+                if ((UsagePage)iCapabilities.UsagePage == Hid.UsagePage.GenericDesktopControls && (UsageCollection.GenericDesktop)iCapabilities.Usage == Hid.UsageCollection.GenericDesktop.GamePad)
                     return DeviceType.Gamepad;
                 if (Info.dwType == RawInputDeviceType.RIM_TYPEHID)
                     return DeviceType.Hid;
@@ -439,7 +441,7 @@ namespace SharpLib.Hid
         {
             get
             {
-                return (uint)(UsagePage<<16) | UsageCollection ;
+                return (uint)(UsagePage << 16) | UsageCollection;
             }
         }
 
@@ -465,7 +467,7 @@ namespace SharpLib.Hid
         /// 
         /// </summary>
         /// <returns></returns>
-        public string ToLog(uint aDepth=0)
+        public string ToLog(uint aDepth = 0)
         {
             string res = "";
 
@@ -513,7 +515,7 @@ namespace SharpLib.Hid
             do
             {
                 rawInputDevices = new RAWINPUTDEVICELIST[deviceCount];
-                
+
                 result = Win32.Function.GetRawInputDeviceList(rawInputDevices, ref deviceCount, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICELIST)));
                 if (result == -1)
                     throw new Exception("Error executing GetRawInputDeviceList.");
